@@ -7,6 +7,9 @@ import java.util.stream.Collectors;
 public class MyReflectionsMethods {
 
 
+    /**
+     * Method for cleanup specified fields and thereafter output another specified fields
+     */
     public static void cleanup(Object object, Set<String> fieldsToCleanup, Set<String> fieldsToOutput) {
         if (fieldsToCleanup == null) {
             fieldsToCleanup = Collections.EMPTY_SET;
@@ -24,22 +27,18 @@ public class MyReflectionsMethods {
 
     private static void cleanupObject(Object object, Set<String> fieldsToCleanup, Set<String> fieldsToOutput) {
         ArrayList<Field> fields = getAllFields(object.getClass());
-
         Set<String> fieldsToChecking = new HashSet<>() {{
             addAll(fieldsToCleanup);
             addAll(fieldsToOutput);
         }};
-        Set<String> fieldsName = fields.stream().map(x -> x.getName()).collect(Collectors.toSet());
-        if (!fieldsToChecking.stream().allMatch(f -> fieldsName.contains(f))) {
+        if (!fields.stream().map(Field::getName).collect(Collectors.toSet()).containsAll(fieldsToChecking)) {
             throw new IllegalArgumentException();
         }
         fields.stream().filter(f -> fieldsToCleanup.contains(f.getName())).forEach(f -> fieldToCleanup(f, object));
         fields.stream().filter(f -> fieldsToOutput.contains(f.getName())).forEachOrdered(f -> fieldToOutput(f, object));
-
     }
 
     private static void cleanupMap(Map<Object, Object> map, Set<String> keysToCleanup, Set<String> keysToOutput) {
-
         Set<String> keysToChecking = new HashSet<>() {{
             addAll(keysToCleanup);
             addAll(keysToOutput);
@@ -48,10 +47,8 @@ public class MyReflectionsMethods {
                 || keysToCleanup.stream().anyMatch(f -> keysToOutput.contains(f))) {
             throw new IllegalArgumentException();
         }
-        keysToCleanup.stream().forEach(f -> map.remove(f));
-        keysToOutput.stream().sequential().forEachOrdered(f -> System.out.println(String.format("%s=%s", f, map.get(f))));
-
-
+        keysToCleanup.forEach(f -> map.remove(f));
+        keysToOutput.forEach(f -> System.out.println(String.format("%s=%s", f, map.get(f))));
     }
 
     private static ArrayList<Field> getAllFields(Class clazz) {
@@ -96,10 +93,8 @@ public class MyReflectionsMethods {
                     break;
             }
         } catch (IllegalAccessException e) {
-            // e.printStackTrace();
             // Nothing
         }
-
     }
 
     private static void fieldToOutput(Field field, Object object) {
@@ -132,17 +127,11 @@ public class MyReflectionsMethods {
                     break;
                 default:
                     Object fieldsValue = field.get(object);
-                    System.out.println(String.format("%s: %s", field.getName(), fieldsValue == null ? "null" : fieldsValue.toString()));
+                    System.out.println(String.format("%s: %s", field.getName(), fieldsValue));
                     break;
             }
         } catch (IllegalAccessException e) {
-            // e.printStackTrace();
             // Nothing
         }
     }
-
-
-    // todo джавадоки заполнить
-    // todo нужно обрабатыват ситуацию когда во входных сетах есть одинаковые строки?
-    // todo сделать проверку входных коллекций на null
 }
