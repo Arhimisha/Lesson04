@@ -83,7 +83,7 @@ public class MyReflectionsMethodsTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void cleanupFail() {
-        MyReflectionsMethods.cleanup(new TestClass(), Set.of("test"), null);
+        MyReflectionsMethods.cleanup(new TestClass(), Set.of("absented name"), null);
     }
 
     @Test

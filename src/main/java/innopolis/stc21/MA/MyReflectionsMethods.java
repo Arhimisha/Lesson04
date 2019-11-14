@@ -8,10 +8,10 @@ public class MyReflectionsMethods {
 
 
     public static void cleanup(Object object, Set<String> fieldsToCleanup, Set<String> fieldsToOutput) {
-        if(fieldsToCleanup == null){
+        if (fieldsToCleanup == null) {
             fieldsToCleanup = Collections.EMPTY_SET;
         }
-        if(fieldsToOutput == null){
+        if (fieldsToOutput == null) {
             fieldsToOutput = Collections.EMPTY_SET;
         }
         if (object instanceof Map) {
@@ -25,12 +25,12 @@ public class MyReflectionsMethods {
     private static void cleanupObject(Object object, Set<String> fieldsToCleanup, Set<String> fieldsToOutput) {
         ArrayList<Field> fields = getAllFields(object.getClass());
 
-        Set<String> fieldsToChecking = new HashSet<>(){{
+        Set<String> fieldsToChecking = new HashSet<>() {{
             addAll(fieldsToCleanup);
             addAll(fieldsToOutput);
         }};
-        if (!fieldsToChecking.stream()
-                .allMatch(f -> fields.stream().map(x -> x.getName()).collect(Collectors.toSet()).contains(f))){
+        Set<String> fieldsName = fields.stream().map(x -> x.getName()).collect(Collectors.toSet());
+        if (!fieldsToChecking.stream().allMatch(f -> fieldsName.contains(f))) {
             throw new IllegalArgumentException();
         }
         fields.stream().filter(f -> fieldsToCleanup.contains(f.getName())).forEach(f -> fieldToCleanup(f, object));
@@ -38,7 +38,18 @@ public class MyReflectionsMethods {
 
     }
 
-    private static void cleanupMap(Map<Object, Object> map, Set<String> fieldsToCleanup, Set<String> fieldsToOutput) {
+    private static void cleanupMap(Map<Object, Object> map, Set<String> keysToCleanup, Set<String> keysToOutput) {
+
+        Set<String> keysToChecking = new HashSet<>() {{
+            addAll(keysToCleanup);
+            addAll(keysToOutput);
+        }};
+        if (!keysToChecking.stream().allMatch(k -> map.containsKey(k))) {
+            throw new IllegalArgumentException();
+        }
+        keysToCleanup.stream().forEach(f -> map.remove(f));
+        keysToChecking.stream().forEach(f -> System.out.println(map.get(f).toString()));
+
 
     }
 
