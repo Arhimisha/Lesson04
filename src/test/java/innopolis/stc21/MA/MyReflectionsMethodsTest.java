@@ -221,8 +221,14 @@ public class MyReflectionsMethodsTest {
             e.printStackTrace();
         }
         MyReflectionsMethods.cleanup(hashMap, null, setToOutput);
-
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void cleanupMapFailWithTheSameField() {
+        Map<String, String> hashMap = new HashMap<>();
+        hashMap.put("key0", "value0");
+
+        MyReflectionsMethods.cleanup(hashMap, Set.of("key0"), Set.of("key0"));
+    }
 }
 
