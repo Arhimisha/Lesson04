@@ -34,7 +34,7 @@ public class MyReflectionsMethods {
             throw new IllegalArgumentException();
         }
         fields.stream().filter(f -> fieldsToCleanup.contains(f.getName())).forEach(f -> fieldToCleanup(f, object));
-        fields.stream().filter(f -> fieldsToOutput.contains(f.getName())).forEach(f -> fieldToOutput(f, object));
+        fields.stream().filter(f -> fieldsToOutput.contains(f.getName())).forEachOrdered(f -> fieldToOutput(f, object));
 
     }
 
@@ -44,11 +44,12 @@ public class MyReflectionsMethods {
             addAll(keysToCleanup);
             addAll(keysToOutput);
         }};
-        if (!keysToChecking.stream().allMatch(k -> map.containsKey(k))) {
+        if (!keysToChecking.stream().allMatch(k -> map.containsKey(k))
+                || keysToCleanup.stream().anyMatch(f -> keysToOutput.contains(f))) {
             throw new IllegalArgumentException();
         }
         keysToCleanup.stream().forEach(f -> map.remove(f));
-        keysToChecking.stream().forEach(f -> System.out.println(map.get(f).toString()));
+        keysToOutput.stream().sequential().forEachOrdered(f -> System.out.println(String.format("%s=%s", f, map.get(f))));
 
 
     }
