@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 
 public class MyReflectionsMethodsTest {
 
-    private class ParrentClass {
+    private class ParentClass {
 
         public int anInt;
         public long aLong;
@@ -40,7 +40,7 @@ public class MyReflectionsMethodsTest {
             return string;
         }
 
-        ParrentClass() {
+        ParentClass() {
             anInt = 3;
             aLong = 4L;
             aFloat = 5.5f;
@@ -49,7 +49,7 @@ public class MyReflectionsMethodsTest {
         }
     }
 
-    private class TestClass extends ParrentClass {
+    private class TestClass extends ParentClass {
         public boolean aBoolean;
         public byte aByte;
         private char aChar;
@@ -81,7 +81,7 @@ public class MyReflectionsMethodsTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void cleanupObjectFail() {
-        MyReflectionsMethods.cleanup(new TestClass(), Set.of("absented name"), null);
+        MyReflectionsMethods.cleanup(new TestClass(), Collections.singleton("absented name"), null);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -89,7 +89,7 @@ public class MyReflectionsMethodsTest {
         Map<String, String> hashMap = new HashMap<>();
         hashMap.put("key0", "value0");
 
-        MyReflectionsMethods.cleanup(hashMap, Set.of("absented key"), null);
+        MyReflectionsMethods.cleanup(hashMap, Collections.singleton("absented key"), null);
     }
 
     @Test
@@ -106,7 +106,7 @@ public class MyReflectionsMethodsTest {
             add("aDouble");
             add("string");
         }};
-        Set<String> emptySet = Collections.EMPTY_SET;
+        Set<String> emptySet = Collections.emptySet();
 
         MyReflectionsMethods.cleanup(testClass, null, null);
         MyReflectionsMethods.cleanup(testClass, emptySet, emptySet);
@@ -125,58 +125,57 @@ public class MyReflectionsMethodsTest {
         System.out.println("Before Cleanup:");
         MyReflectionsMethods.cleanup(testClass, emptySet, allFields);
 
-        PrintStream sysOut = System.out;
-        ByteArrayOutputStream baOut = new ByteArrayOutputStream();
-        PrintStream out = new PrintStream(baOut);
-        System.setOut(out);
 
-        MyReflectionsMethods.cleanup(testClass, emptySet, allFields);
+        try (ByteArrayOutputStream baOut = new ByteArrayOutputStream()) {
+            PrintStream sysOut = System.out;
+            PrintStream out = new PrintStream(baOut);
+            System.setOut(out);
 
-        String outputSample = new String(baOut.toByteArray());
-        baOut.reset();
-        String defaultSample = "aBoolean: true" + System.lineSeparator() +
-                "aByte: 1" + System.lineSeparator() +
-                "aChar: !" + System.lineSeparator() +
-                "aShort: 2" + System.lineSeparator() +
-                "anInt: 3" + System.lineSeparator() +
-                "aLong: 4" + System.lineSeparator() +
-                "aFloat: 5.5" + System.lineSeparator() +
-                "aDouble: 6.6" + System.lineSeparator() +
-                "string: Not null string" + System.lineSeparator();
-        assertEquals(defaultSample, outputSample);
+            MyReflectionsMethods.cleanup(testClass, emptySet, allFields);
 
-        //Cleanup all fields
-        MyReflectionsMethods.cleanup(testClass, allFields, emptySet);
+            String outputSample = new String(baOut.toByteArray());
+            baOut.reset();
+            String defaultSample = "aBoolean: true" + System.lineSeparator() +
+                    "aByte: 1" + System.lineSeparator() +
+                    "aChar: !" + System.lineSeparator() +
+                    "aShort: 2" + System.lineSeparator() +
+                    "anInt: 3" + System.lineSeparator() +
+                    "aLong: 4" + System.lineSeparator() +
+                    "aFloat: 5.5" + System.lineSeparator() +
+                    "aDouble: 6.6" + System.lineSeparator() +
+                    "string: Not null string" + System.lineSeparator();
+            assertEquals(defaultSample, outputSample);
 
-        assertFalse(testClass.isaBoolean());
-        assertEquals(testClass.getaByte(), (byte) 0);
-        assertEquals(testClass.getaChar(), '\u0000');
-        assertEquals(testClass.getaShort(), (short) 0);
-        assertEquals(testClass.getAnInt(), 0);
-        assertEquals(testClass.getaLong(), 0L);
-        assertEquals(testClass.getaFloat(), 0.0F, 0.0f);
-        assertEquals(testClass.getaDouble(), 0.0, 0.0);
-        assertNull(testClass.getString());
+            //Cleanup all fields
+            MyReflectionsMethods.cleanup(testClass, allFields, emptySet);
+
+            assertFalse(testClass.isaBoolean());
+            assertEquals(testClass.getaByte(), (byte) 0);
+            assertEquals(testClass.getaChar(), '\u0000');
+            assertEquals(testClass.getaShort(), (short) 0);
+            assertEquals(testClass.getAnInt(), 0);
+            assertEquals(testClass.getaLong(), 0L);
+            assertEquals(testClass.getaFloat(), 0.0F, 0.0f);
+            assertEquals(testClass.getaDouble(), 0.0, 0.0);
+            assertNull(testClass.getString());
 
 
-        MyReflectionsMethods.cleanup(testClass, emptySet, allFields);
-        outputSample = new String(baOut.toByteArray());
-        String cleanSample = "aBoolean: false" + System.lineSeparator() +
-                "aByte: 0" + System.lineSeparator() +
-                "aChar: " + '\u0000' + System.lineSeparator() +
-                "aShort: 0" + System.lineSeparator() +
-                "anInt: 0" + System.lineSeparator() +
-                "aLong: 0" + System.lineSeparator() +
-                "aFloat: 0.0" + System.lineSeparator() +
-                "aDouble: 0.0" + System.lineSeparator() +
-                "string: null" + System.lineSeparator();
-        assertEquals(cleanSample, outputSample);
+            MyReflectionsMethods.cleanup(testClass, emptySet, allFields);
+            outputSample = new String(baOut.toByteArray());
+            String cleanSample = "aBoolean: false" + System.lineSeparator() +
+                    "aByte: 0" + System.lineSeparator() +
+                    "aChar: " + '\u0000' + System.lineSeparator() +
+                    "aShort: 0" + System.lineSeparator() +
+                    "anInt: 0" + System.lineSeparator() +
+                    "aLong: 0" + System.lineSeparator() +
+                    "aFloat: 0.0" + System.lineSeparator() +
+                    "aDouble: 0.0" + System.lineSeparator() +
+                    "string: null" + System.lineSeparator();
+            assertEquals(cleanSample, outputSample);
 
-        System.setOut(sysOut);
-        try {
-            baOut.close();
+            System.setOut(sysOut);
         } catch (IOException e) {
-            e.printStackTrace();
+            assertTrue(false);
         }
         //Output cleanup fields
         System.out.println("\nAfter Cleanup:");
@@ -190,35 +189,29 @@ public class MyReflectionsMethodsTest {
             hashMap.put("key" + String.valueOf(i), "value" + String.valueOf(i));
         }
 
-        Set<String> setToOutput = new LinkedHashSet<>() {{
-            add("key0");
-            add("key4");
-            add("key7");
-        }};
-
-        PrintStream sysOut = System.out;
-        ByteArrayOutputStream baOut = new ByteArrayOutputStream();
-        PrintStream out = new PrintStream(baOut);
-        System.setOut(out);
-
-        MyReflectionsMethods.cleanup(hashMap, Set.of("key1", "key5", "key8"), setToOutput);
-        assertEquals(7, hashMap.size());
-        assertEquals("value0", hashMap.get("key0"));
-        assertNull(hashMap.get("key1"));
-        assertEquals("value2", hashMap.get("key2"));
+        Set<String> setToOutput = new LinkedHashSet<>(Arrays.asList("key0", "key4", "key7"));
+        try (ByteArrayOutputStream baOut = new ByteArrayOutputStream()) {
+            PrintStream sysOut = System.out;
+            PrintStream out = new PrintStream(baOut);
+            System.setOut(out);
+            new LinkedHashSet<String>(Arrays.asList("key1", "key5", "key8"));
+            MyReflectionsMethods.cleanup(hashMap, new LinkedHashSet<String>(Arrays.asList("key1", "key5", "key8")), setToOutput);
+            assertEquals(7, hashMap.size());
+            assertEquals("value0", hashMap.get("key0"));
+            assertNull(hashMap.get("key1"));
+            assertEquals("value2", hashMap.get("key2"));
 
 
-        String outputSample = new String(baOut.toByteArray());
-        baOut.reset();
-        String defaultSample = "key0=value0" + System.lineSeparator() +
-                "key4=value4" + System.lineSeparator() +
-                "key7=value7" + System.lineSeparator();
-        assertEquals(defaultSample, outputSample);
-        System.setOut(sysOut);
-        try {
-            baOut.close();
+            String outputSample = new String(baOut.toByteArray());
+            baOut.reset();
+            String defaultSample = "key0=value0" + System.lineSeparator() +
+                    "key4=value4" + System.lineSeparator() +
+                    "key7=value7" + System.lineSeparator();
+            assertEquals(defaultSample, outputSample);
+            System.setOut(sysOut);
+
         } catch (IOException e) {
-            e.printStackTrace();
+            assertTrue(false);
         }
         MyReflectionsMethods.cleanup(hashMap, null, setToOutput);
     }
@@ -227,8 +220,7 @@ public class MyReflectionsMethodsTest {
     public void cleanupMapFailWithTheSameField() {
         Map<String, String> hashMap = new HashMap<>();
         hashMap.put("key0", "value0");
-
-        MyReflectionsMethods.cleanup(hashMap, Set.of("key0"), Set.of("key0"));
+        MyReflectionsMethods.cleanup(hashMap, Collections.singleton("key0"), Collections.singleton("key0"));
     }
 }
 

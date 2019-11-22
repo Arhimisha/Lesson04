@@ -12,13 +12,13 @@ public class MyReflectionsMethods {
      */
     public static void cleanup(Object object, Set<String> fieldsToCleanup, Set<String> fieldsToOutput) {
         if (fieldsToCleanup == null) {
-            fieldsToCleanup = Collections.EMPTY_SET;
+            fieldsToCleanup = Collections.emptySet();
         }
         if (fieldsToOutput == null) {
-            fieldsToOutput = Collections.EMPTY_SET;
+            fieldsToOutput = Collections.emptySet();
         }
         if (object instanceof Map) {
-            Map map = (Map<Object, Object>) object;
+            Map map = (Map) object;
             cleanupMap(map, fieldsToCleanup, fieldsToOutput);
         } else {
             cleanupObject(object, fieldsToCleanup, fieldsToOutput);
@@ -26,7 +26,7 @@ public class MyReflectionsMethods {
     }
 
     private static void cleanupObject(Object object, Set<String> fieldsToCleanup, Set<String> fieldsToOutput) {
-        ArrayList<Field> fields = getAllFields(object.getClass());
+        List<Field> fields = getAllFields(object.getClass());
         Set<String> fieldsToChecking = new HashSet<>() {{
             addAll(fieldsToCleanup);
             addAll(fieldsToOutput);
@@ -43,16 +43,16 @@ public class MyReflectionsMethods {
             addAll(keysToCleanup);
             addAll(keysToOutput);
         }};
-        if (!keysToChecking.stream().allMatch(k -> map.containsKey(k))
-                || keysToCleanup.stream().anyMatch(f -> keysToOutput.contains(f))) {
+        if (!keysToChecking.stream().allMatch(map::containsKey)
+                || keysToCleanup.stream().anyMatch(keysToOutput::contains)) {
             throw new IllegalArgumentException();
         }
-        keysToCleanup.forEach(f -> map.remove(f));
+        keysToCleanup.forEach(map::remove);
         keysToOutput.forEach(f -> System.out.println(String.format("%s=%s", f, map.get(f))));
     }
 
-    private static ArrayList<Field> getAllFields(Class clazz) {
-        ArrayList<Field> fieldsList = new ArrayList<>();
+    private static List<Field> getAllFields(Class clazz) {
+        List<Field> fieldsList = new ArrayList<>();
         while (clazz != null) {
             Collections.addAll(fieldsList, clazz.getDeclaredFields());
             clazz = clazz.getSuperclass();
@@ -93,45 +93,16 @@ public class MyReflectionsMethods {
                     break;
             }
         } catch (IllegalAccessException e) {
-            // Nothing
+            System.out.println("Сaught IllegalAccessException");
         }
     }
 
     private static void fieldToOutput(Field field, Object object) {
         field.setAccessible(true);
         try {
-            switch (field.getGenericType().getTypeName()) {
-                case "boolean":
-                    System.out.println(String.format("%s: %s", field.getName(), String.valueOf((boolean) field.get(object))));
-                    break;
-                case "byte":
-                    System.out.println(String.format("%s: %s", field.getName(), String.valueOf((byte) field.get(object))));
-                    break;
-                case "char":
-                    System.out.println(String.format("%s: %s", field.getName(), String.valueOf((char) field.get(object))));
-                    break;
-                case "short":
-                    System.out.println(String.format("%s: %s", field.getName(), String.valueOf((short) field.get(object))));
-                    break;
-                case "int":
-                    System.out.println(String.format("%s: %s", field.getName(), String.valueOf((int) field.get(object))));
-                    break;
-                case "long":
-                    System.out.println(String.format("%s: %s", field.getName(), String.valueOf((long) field.get(object))));
-                    break;
-                case "float":
-                    System.out.println(String.format("%s: %s", field.getName(), String.valueOf((float) field.get(object))));
-                    break;
-                case "double":
-                    System.out.println(String.format("%s: %s", field.getName(), String.valueOf((double) field.get(object))));
-                    break;
-                default:
-                    Object fieldsValue = field.get(object);
-                    System.out.println(String.format("%s: %s", field.getName(), fieldsValue));
-                    break;
-            }
+            System.out.println(String.format("%s: %s", field.getName(), String.valueOf(field.get(object))));
         } catch (IllegalAccessException e) {
-            // Nothing
+            System.out.println("Сaught IllegalAccessException");
         }
     }
 }
